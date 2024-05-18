@@ -118,12 +118,19 @@ async function run() {
             res.send(post)
         });
 
+        // upcomming six posts
+        // upcoming Dates and Timestamps
+        app.get('/upcommint-six-posts', async (req, res) => {
+            const posts = await postCollection.find()
+                .sort({ deadline: 1 })
+                .limit(6).toArray()
+            res.send(posts)
+        });
+
         // upcomming three posts
         app.get('/upcommint-three-posts', async (req, res) => {
-
-            // upcoming Dates and Timestamps
             const posts = await postCollection.find()
-                .sort({ createdAt: -1 })
+                .sort({ deadline: 1 })
                 .limit(3).toArray()
             res.send(posts)
         });
