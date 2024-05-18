@@ -20,7 +20,23 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
+// verify jwt middleware
+const verifyToken = (req, res, next) => {
+    const token = req.cookies?.token
+    if (!token) return res.status(401).send({ message: 'unauthorized access' })
+    if (token) {
+        jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+            if (err) {
+                console.log(err)
+                return res.status(401).send({ message: 'unauthorized access' })
+            }
+            console.log(decoded)
 
+            req.user = decoded
+            next()
+        })
+    }
+}
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.5mrfovz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -71,14 +87,28 @@ async function run() {
                 sameSite: 'none',
                 maxAge: 0
             }).send({ success: true })
-        })
+        });
+
+        // get all posts from the database by specific email
+        app.get('/my-posts/:eamil', verifyToken, async (req, res) => {
+            const tokenEmail = req.user.email
+            const email = req.user.email
+            console.log(96, tokenEmail, email);
+
+            if (tokenEmail !== email) return res.status(401).send({ message: 'Unauthorized Access' })
+
+            const query = { 'user.email': email }
+            const posts = await postCollection.find(query).toArray()
+            res.send(posts)
+        });
+
 
         app.post('/volunteerPost', async (req, res) => {
             const post = req.body
             console.log(post);
             const result = await postCollection.insertOne(post)
             res.send(result)
-        })
+        });
 
         const VolunteerCollection = client.db('soloSphere').collection('post')
         // Send a ping to confirm a successful connection
