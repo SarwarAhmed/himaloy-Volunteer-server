@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
 const jwt = require('jsonwebtoken')
@@ -109,6 +109,25 @@ async function run() {
             const result = await postCollection.insertOne(post)
             res.send(result)
         });
+
+        // get a single volunteer post by id
+        app.get('/volunteer-post/:id', async (req, res) => {
+            const id = req.params.id
+            const post = await postCollection.findOne({ _id: new ObjectId(id) })
+            console.log(post);
+            res.send(post)
+        });
+
+        // upcomming three posts
+        app.get('/upcommint-three-posts', async (req, res) => {
+
+            // upcoming Dates and Timestamps
+            const posts = await postCollection.find()
+                .sort({ createdAt: -1 })
+                .limit(3).toArray()
+            res.send(posts)
+        });
+
 
         const VolunteerCollection = client.db('soloSphere').collection('post')
         // Send a ping to confirm a successful connection
