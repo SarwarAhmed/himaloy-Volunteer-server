@@ -57,6 +57,7 @@ async function run() {
         // await client.connect();
 
         const postCollection = client.db('himalayan').collection('post');
+        const volunteerRequestCollection = client.db('himalayan').collection('volunteerRequest');
 
         // JWT generation
         app.post('/jwt', (req, res) => {
@@ -133,6 +134,23 @@ async function run() {
                 .sort({ deadline: 1 })
                 .limit(3).toArray()
             res.send(posts)
+        });
+
+        app.post('/volunteer-request', verifyToken, async (req, res) => {
+            const volunteerRequest = req.body;
+            const postId = volunteerRequest.postId;
+            const post = await postCollection.findOne({ _id: new ObjectId(postId) });
+            const noOfVolunteers = parseInt(post.numberOfVolunteers);
+            console.log(post, noOfVolunteers);
+            if (parseInt(noOfVolunteers) === 0) {
+                return res.status(400).send({ message: 'No volunteer needed' });
+            }
+
+            const result = await volunteerRequestCollection.insertOne(volunteerRequest);
+            await postCollection.updateOne({ _id: new ObjectId(postId) }, {
+                $inc: { numberOfVolunteers: -1 }
+            });
+            res.send(result);
         });
 
 
