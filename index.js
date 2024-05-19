@@ -94,13 +94,47 @@ async function run() {
         app.get('/my-posts/:eamil', verifyToken, async (req, res) => {
             const tokenEmail = req.user.email
             const email = req.user.email
-            console.log(96, tokenEmail, email);
+            // console.log(96, tokenEmail, email);
 
             if (tokenEmail !== email) return res.status(401).send({ message: 'Unauthorized Access' })
 
             const query = { 'user.email': email }
             const posts = await postCollection.find(query).toArray()
             res.send(posts)
+        });
+
+        // update a post by id and email for the specific user
+        app.put('/update-post/:id', verifyToken, async (req, res) => {
+            const tokenEmail = req.user.email
+            const email = req.user.email
+            // console.log(96, tokenEmail, email);
+
+            if (tokenEmail !== email) return res.status(401).send({ message: 'Unauthorized Access' })
+
+            const id = req.params.id
+            const post = await postCollection.findOne({ _id: new ObjectId(id) })
+            const query = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    ...post
+                }
+            }
+            const result = await postCollection.updateOne(query, updateDoc)
+            res.send(result)
+        });
+
+
+        // delete a post by id and email for the specific user
+        app.delete('/delete-post/:id', verifyToken, async (req, res) => {
+            const tokenEmail = req.user.email
+            const email = req.user.email
+
+            if (tokenEmail !== email) return res.status(401).send({ message: 'Unauthorized Access' })
+
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await postCollection.deleteOne(query)
+            res.send(result)
         });
 
 
