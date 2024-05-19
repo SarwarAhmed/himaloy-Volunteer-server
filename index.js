@@ -119,6 +119,12 @@ async function run() {
             res.send(post)
         });
 
+        // show all posts
+        app.get('/posts', async (req, res) => {
+            const posts = await postCollection.find().toArray()
+            res.send(posts)
+        });
+
         // upcomming six posts
         // upcoming Dates and Timestamps
         app.get('/upcommint-six-posts', async (req, res) => {
