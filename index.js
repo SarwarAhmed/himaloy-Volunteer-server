@@ -9,14 +9,15 @@ const app = express();
 
 const corsOptions = {
     origin: [
+        'https://himaloy.web.app',
         'http://localhost:5173',
-        'https://himalayansa.firebaseapp.com',
     ],
     credentials: true,
     optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
+// app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
@@ -67,18 +68,18 @@ async function run() {
                 expiresIn: '7d'
             })
 
-            res.cookie('token', token, {
-                httpOnly: true,
-                secure: true,
-                sameSite: 'none',
-                maxAge: 604800000
-            }).send({ success: true })
-
             // res.cookie('token', token, {
             //     httpOnly: true,
-            //     secure: process.env.NODE_ENV === 'production',
-            //     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+            //     secure: true,
+            //     sameSite: 'none',
+            //     maxAge: 604800000
             // }).send({ success: true })
+
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict'
+            }).send({ success: true })
         })
 
         app.get('/logout', (req, res) => {
